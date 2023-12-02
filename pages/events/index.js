@@ -8,8 +8,12 @@ const Home = () => {
   const [events, setEvents] = useState([]);
   const router = useRouter();
 
-  useEffect(() => {
+  const handleRefresh = () => {
     getEvents().then(setEvents);
+  };
+
+  useEffect(() => {
+    handleRefresh();
   }, []);
 
   return (
@@ -24,7 +28,7 @@ const Home = () => {
       <h1>Events</h1>
       {events.map((event) => (
         <section key={event.id}>
-          <EventCard obj={event} />
+          <EventCard obj={event} handleRefresh={handleRefresh} />
         </section>
       ))}
     </article>

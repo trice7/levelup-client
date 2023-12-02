@@ -25,7 +25,16 @@ const GameForm = ({ user, obj }) => {
   useEffect(() => {
     getGameTypes().then(setGameTypes);
 
-    if (obj) setCurrentGame(obj);
+    if (obj) {
+      const gameObj = {
+        maker: obj.maker,
+        title: obj.title,
+        numberOfPlayers: obj.number_of_players,
+        skillLevel: obj.skill_level,
+        gameTypeId: obj.game_type?.id,
+      };
+      setCurrentGame(gameObj);
+    }
   }, [obj]);
 
   const handleChange = (e) => {
@@ -53,9 +62,9 @@ const GameForm = ({ user, obj }) => {
     const updatedGame = {
       maker: currentGame.maker,
       title: currentGame.title,
-      numberOfPlayers: Number(currentGame.number_of_players),
-      skillLevel: Number(currentGame.skill_level),
-      gameType: Number(currentGame.game_type?.id),
+      numberOfPlayers: Number(currentGame.numberOfPlayers),
+      skillLevel: Number(currentGame.skillLevel),
+      gameType: Number(currentGame.gameTypeId),
       userId: user.uid,
       id: obj.id,
     };
@@ -89,10 +98,11 @@ const GameForm = ({ user, obj }) => {
             aria-label="Game Type"
             name="gameTypeId"
             onChange={handleChange}
+            value={currentGame.gameTypeId}
             className="mb-3"
             required
           >
-            <option value={obj ? obj.game_type?.id : ''}>{obj ? obj.game_type?.label : 'Select a Game Type'}</option>
+            <option value="">Select a Game Type</option>
             {
               gameTypes.map((type) => (
                 <option
@@ -124,6 +134,10 @@ GameForm.propTypes = {
       label: PropTypes.string,
       id: PropTypes.number,
     }),
+    maker: PropTypes.string,
+    skill_level: PropTypes.number,
+    title: PropTypes.string,
+    number_of_players: PropTypes.number,
   }),
 };
 

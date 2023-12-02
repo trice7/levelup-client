@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { createGame, getGameTypes } from '../../utils/data/gameData';
+import { createGame, getGameTypes, updateGame } from '../../utils/data/gameData';
 
 const initialState = {
   skillLevel: 1,
@@ -12,7 +12,7 @@ const initialState = {
   gameTypeId: 0,
 };
 
-const GameForm = ({ user }) => {
+const GameForm = ({ user, obj }) => {
   const [gameTypes, setGameTypes] = useState([]);
   /*
   Since the input fields are bound to the values of
@@ -24,7 +24,9 @@ const GameForm = ({ user }) => {
 
   useEffect(() => {
     getGameTypes().then(setGameTypes);
-  }, []);
+
+    if (obj) setCurrentGame(obj);
+  }, [obj]);
 
   const handleChange = (e) => {
     // TODO: Complete the onChange function
@@ -48,12 +50,31 @@ const GameForm = ({ user }) => {
       userId: user.uid,
     };
 
-    // Send POST request to your API
-    createGame(game).then(() => router.push('/games'));
+    const updatedGame = {
+      maker: currentGame.maker,
+      title: currentGame.title,
+      numberOfPlayers: Number(currentGame.number_of_players),
+      skillLevel: Number(currentGame.skill_level),
+      gameType: Number(currentGame.game_type?.id),
+      userId: user.uid,
+      id: obj.id,
+    };
+
+    if (obj.id) {
+      updateGame(updatedGame).then(router.push('/games'));
+    } else {
+      // Send POST request to your API
+      createGame(game).then(() => router.push('/games'));
+    }
+  };
+
+  const handleTest = () => {
+    console.warn(currentGame);
   };
 
   return (
     <>
+      <Button onClick={handleTest}>Test</Button>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Title</Form.Label>
@@ -71,7 +92,7 @@ const GameForm = ({ user }) => {
             className="mb-3"
             required
           >
-            <option value="">Select a Game Type</option>
+            <option value={obj ? obj.game_type?.id : ''}>{obj ? obj.game_type?.label : 'Select a Game Type'}</option>
             {
               gameTypes.map((type) => (
                 <option
@@ -97,6 +118,17 @@ GameForm.propTypes = {
   user: PropTypes.shape({
     uid: PropTypes.string.isRequired,
   }).isRequired,
+  obj: PropTypes.shape({
+    id: PropTypes.number,
+    game_type: PropTypes.shape({
+      label: PropTypes.string,
+      id: PropTypes.number,
+    }),
+  }),
+};
+
+GameForm.defaultProps = {
+  obj: '',
 };
 
 export default GameForm;

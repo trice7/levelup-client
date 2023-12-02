@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 
 const EventCard = ({ obj }) => (
   <Card className="text-center">
@@ -8,6 +9,9 @@ const EventCard = ({ obj }) => (
     <Card.Body>
       <Card.Title>When: {obj.date} at {obj.time}</Card.Title>
       <Card.Text>{obj.description} players needed</Card.Text>
+      <Link href={`/events/edit/${obj.id}`} passHref>
+        <Button>Edit Event</Button>
+      </Link>
     </Card.Body>
   </Card>
 );

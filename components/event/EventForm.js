@@ -10,7 +10,7 @@ import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
-import { createEvent } from '../../utils/data/eventData';
+import { createEvent, updateEvent } from '../../utils/data/eventData';
 
 const initialState = {
   game: '',
@@ -19,18 +19,20 @@ const initialState = {
   time: '',
 };
 
-const EventForm = ({ user }) => {
+const EventForm = ({ user, obj }) => {
   const [games, setGames] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(initialState);
-  const [eventDate, setEventDate] = useState(initialState.date);
-  const [eventTime, setEventTime] = useState(initialState.time);
-  const [formDate, setFormDate] = useState('');
+  // const [eventDate, setEventDate] = useState(initialState.date);
+  // const [eventTime, setEventTime] = useState(initialState.time);
+  // const [formDate, setFormDate] = useState('');
 
   const router = useRouter();
 
   useEffect(() => {
     getGames().then(setGames);
-  }, []);
+
+    if (obj) setCurrentEvent(obj);
+  }, [obj]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,14 +44,22 @@ const EventForm = ({ user }) => {
 
   const handleDateChange = (e) => {
     const date = new Date(e);
-    const offset = date.getTimezoneOffset();
-    const todayDate = new Date(date.getTime() + (offset * 60 * 1000));
-    setEventDate(date.toISOString().split('T')[0]);
-    setFormDate(todayDate);
+    // const offset = date.getTimezoneOffset();
+    // const todayDate = new Date(date.getTime() + (offset * 60 * 1000));
+    // setEventDate(date.toISOString().split('T')[0]);
+    // setFormDate(todayDate);
+    setCurrentEvent((prevState) => ({
+      ...prevState,
+      date: date.toISOString().split('T')[0],
+    }));
   };
 
   const handleTimeChange = (e) => {
-    setEventTime(`${e}:00`);
+    // setEventTime(`${e}:00`);
+    setCurrentEvent((prevState) => ({
+      ...prevState,
+      time: `${e}:00`,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -57,16 +67,34 @@ const EventForm = ({ user }) => {
     const payload = {
       gameId: Number(currentEvent.game),
       description: currentEvent.description,
-      date: eventDate,
-      time: eventTime,
+      date: currentEvent.date,
+      time: currentEvent.time,
       userId: user.uid,
     };
-    console.warn(payload);
-    createEvent(payload).then(router.push('/events'));
+
+    const updatedPayload = {
+      gameId: Number(currentEvent.game),
+      description: currentEvent.description,
+      date: currentEvent.date,
+      time: currentEvent.time,
+      userId: user.uid,
+      id: obj.id,
+    };
+
+    if (obj.id) {
+      updateEvent(updatedPayload).then(router.push('/events'));
+    } else {
+      createEvent(payload).then(router.push('/events'));
+    }
+  };
+
+  const handleTest = () => {
+    console.warn(obj);
   };
 
   return (
     <div>
+      <Button onClick={handleTest}>Test Obj</Button>
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Select
@@ -76,7 +104,7 @@ const EventForm = ({ user }) => {
             className="mb-3"
             required
           >
-            <option value="">Select a Game</option>
+            <option value={obj ? obj.game?.id : ''}>{obj ? obj.game?.title : 'Please select a game'}</option>
             {
               games.map((game) => (
                 <option
@@ -95,10 +123,10 @@ const EventForm = ({ user }) => {
           <Form.Control name="description" required value={currentEvent.description} onChange={handleChange} as="textarea" rows={3} />
         </Form.Group>
         <Form.Group>
-          <DatePicker onChange={handleDateChange} name="date" value={formDate} format="yyyy-MM-dd" required />
+          <DatePicker onChange={handleDateChange} name="date" value={currentEvent.date} format="yyyy-MM-dd" required />
         </Form.Group>
         <Form.Group>
-          <TimePicker required onChange={handleTimeChange} value={eventTime} disableClock="true" />
+          <TimePicker required onChange={handleTimeChange} value={currentEvent.time} disableClock="true" />
         </Form.Group>
 
         <Button variant="primary" type="submit">
@@ -113,6 +141,17 @@ EventForm.propTypes = {
   user: PropTypes.shape({
     uid: PropTypes.string.isRequired,
   }).isRequired,
+  obj: PropTypes.shape({
+    id: PropTypes.number,
+    game: PropTypes.shape({
+      title: PropTypes.string,
+      id: PropTypes.number,
+    }),
+  }),
+};
+
+EventForm.defaultProps = {
+  obj: '',
 };
 
 export default EventForm;

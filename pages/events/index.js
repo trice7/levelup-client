@@ -1,15 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import EventCard from '../../components/event/eventCard';
 import { getEvents } from '../../utils/data/eventData';
+import { useAuth } from '../../utils/context/authContext';
 
 const Home = () => {
   const [events, setEvents] = useState([]);
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleRefresh = () => {
-    getEvents().then(setEvents);
+    getEvents(user.uid).then(setEvents);
   };
 
   useEffect(() => {

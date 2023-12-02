@@ -101,10 +101,11 @@ const EventForm = ({ user, obj }) => {
             aria-label="Games"
             name="game"
             onChange={handleChange}
+            value={currentEvent.game?.id}
             className="mb-3"
             required
           >
-            <option value={obj ? obj.game?.id : ''}>{obj ? obj.game?.title : 'Please select a game'}</option>
+            <option value="">Please Select a Game</option>
             {
               games.map((game) => (
                 <option

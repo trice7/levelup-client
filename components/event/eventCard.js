@@ -2,11 +2,28 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
-import { deleteEvent } from '../../utils/data/eventData';
+import { useAuth } from '../../utils/context/authContext';
+import { deleteEvent, joinEvent, leaveEvent } from '../../utils/data/eventData';
 
 const EventCard = ({ obj, handleRefresh }) => {
+  const { user } = useAuth();
+
   const handleDelete = () => {
     deleteEvent(obj.id).then(handleRefresh);
+  };
+
+  const handleJoin = () => {
+    const payload = {
+      userId: user.uid,
+    };
+    joinEvent(obj.id, user.uid, payload).then(handleRefresh);
+  };
+
+  const handleLeave = () => {
+    const payload = {
+      userId: user.uid,
+    };
+    leaveEvent(obj.id, user.uid, payload).then(handleRefresh);
   };
 
   return (
@@ -19,6 +36,7 @@ const EventCard = ({ obj, handleRefresh }) => {
           <Button>Edit Event</Button>
         </Link>
         <Button variant="danger" onClick={handleDelete}>Delete Event</Button>
+        {obj.joined ? (<Button variant="warning" onClick={handleLeave}>Leave Event</Button>) : (<Button variant="success" onClick={handleJoin}>Join Event</Button>)}
       </Card.Body>
     </Card>
   );
@@ -31,6 +49,7 @@ EventCard.propTypes = {
     time: PropTypes.string,
     description: PropTypes.string,
     id: PropTypes.number,
+    joined: PropTypes.bool,
   }).isRequired,
   handleRefresh: PropTypes.func.isRequired,
 };
